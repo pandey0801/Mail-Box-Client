@@ -17,9 +17,47 @@ export default function Compose() {
   const [mails, setMails] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  const deleteHandle = (id) =>{
+    // console.log(id); //-NzlTYyYVD7QgoH6SYhl
+    // fetch(`https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail/${id}.json`, {
+    //   method:'DELETE',
+    // }).then((res)=>{
+    //   if(res.ok)
+    //     {
+    //       console.log("delete mail");
+    //     }
+    //     else{
+    //       console.log("some error in the delete featch");
+    //       throw new Error("Failed to delete data.");
+    //     }
+    // }).catch((error)=>
+    // {
+    //   console.log(error);
+    // })
+
+    fetch(
+      `https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail/${id}.json`,
+      {
+        method: "DELETE",
+      }
+    )
+      .then((res) => {
+        if (res.ok) {
+          // console.log(key); //-NzMGueYmKqrRIyDSKGI
+          // dispatch(expensesActions.deleteExpense(key));
+          console.log("delete mail");
+          setMails((prevMails) => prevMails.filter(mail => mail.id !== id));
+        } else {
+          throw new Error("Failed to delete data.");
+        }
+      })
+      .catch((error) => console.error("Error deleting data:", error));
+  }
+
+
   useEffect(() => {
     getfn();
-  }, []);
+  },[]);
 
   const getfn = () => {
     fetch("https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail.json", {
@@ -78,6 +116,7 @@ export default function Compose() {
     }
   };
 
+  
   return (
     <>
       <div>
@@ -191,11 +230,13 @@ export default function Compose() {
                   <li
                     key={mail.id}
                     className={`p-4 bg-white rounded shadow-md cursor-pointer ${mail.read ? '' : 'border-l-4 border-blue-500'}`}
-                    onClick={() => markAsRead(mail.id)}
+                    // onClick={() => markAsRead(mail.id)}
                   >
                     <p className="font-bold">To: {mail.to}</p>
                     <p className="font-semibold">Subject: {mail.subject}</p>
                     <p className="text-gray-700">Body: {mail.body}</p>
+                   { !mail.read &&(<button className="bg-blue-500 px-2 border border-1 mt-2 rounded-md" onClick={()=>markAsRead(mail.id)}>Read</button>)}
+                    <button className="bg-red-500 px-2 border border-1 mt-2 rounded-md" onClick={()=>deleteHandle(mail.id)}>Delete</button>
                   </li>
                 ))}
               </ul>
