@@ -1,49 +1,10 @@
 
-/*
 import React, { useState } from 'react';
 import { Editor } from "react-draft-wysiwyg";
 import { EditorState, convertToRaw } from 'draft-js';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
-
-export default function Mail() {
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-
-  const onEditorStateChange = (editorState) => {
-    setEditorState(editorState);
-  };
-
-   const getTextFromEditor = () => {
-    const contentState = editorState.getCurrentContent();
-    const raw = convertToRaw(contentState);
-    const blocks = raw.blocks;
-    const text = blocks.map(block => block.text).join('\n');
-    return text;
-  };
-
-  console.log(getTextFromEditor());
-
-  return (
-    <>
-      <Editor
-        editorState={editorState}
-        toolbarClassName="toolbarClassName"
-        wrapperClassName="wrapperClassName"
-        editorClassName="editorClassName"
-        onEditorStateChange={onEditorStateChange}
-      />
-    </>
-  );
-}
-
-*/
-
-import React, { useState } from 'react';
-import { Editor } from "react-draft-wysiwyg";
-import { EditorState, convertToRaw } from 'draft-js';
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-
-export default function Mail() {
+export default function Mail({onClose,  onMailSent}) {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const [showCcBcc, setShowCcBcc] = useState(false);
   const [mailDetails, setMailDetails] = useState({
@@ -88,6 +49,10 @@ export default function Mail() {
       if(req.ok)
         {
           console.log("mail post");
+          const result = req.json();
+          onMailSent({ id: result.name, ...mailDetails });
+          // onMailSent({ id: result.name, ...newMail }); 
+
         }
         else{
           console.log("error")
@@ -103,12 +68,19 @@ export default function Mail() {
       subject: '',
       body: '',
     })
+
+    onClose();
+
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    // <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-lg">
+        <div className='flex justify-between'>
         <h2 className="text-2xl font-bold mb-4">Compose Mail</h2>
+        <button className='border rounded-md bottom-2 bg-red-500 px-3 py-2 font-bold' onClick={onClose}>X</button>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="to" className="block text-sm font-medium text-gray-700">To</label>
@@ -174,3 +146,90 @@ export default function Mail() {
     </div>
   );
 }
+
+/*
+
+import React, { useState } from "react";
+
+export default function Mail({ onClose, onMailSent }) {
+  const [to, setTo] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const newMail = {
+      to,
+      subject,
+      body,
+      read: false,
+    };
+
+    try {
+      const response = await fetch(
+        "https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail.json",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newMail),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to send mail.");
+      }
+
+      const result = await response.json();
+      onMailSent({ id: result.name, ...newMail }); // Call the callback function with the new mail
+
+      // Reset form fields
+      setTo("");
+      setSubject("");
+      setBody("");
+      onClose(); // Close the compose window
+    } catch (error) {
+      console.error("Error sending mail:", error);
+    }
+  };
+
+  return (
+    <div className="compose-mail">
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>To:</label>
+          <input
+            type="email"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Subject:</label>
+          <input
+            type="text"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Body:</label>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+          ></textarea>
+        </div>
+        <button type="submit">Send</button>
+        <button type="button" onClick={onClose}>
+          Cancel
+        </button>
+      </form>
+    </div>
+  );
+}
+
+*/

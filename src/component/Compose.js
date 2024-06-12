@@ -8,6 +8,7 @@ import {
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import FullScreen from "./FullScreen";
+import Mail from "./Mail";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -41,12 +42,14 @@ export default function Compose() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSentBox, setIsSentBox] = useState(false);
   const [defaultScreen, setDefaultScreen] = useState(true);
+  const [selectedMail, setSelectedMail] = useState(null); // State to manage the selected mail
+  const [mailOpen, setMailOpen] = useState(false);
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
 
   const { data, error } = useFetch(
     "https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail.json"
   );
-    // console.log(data);
-    // console.log(error);
+
 
   useEffect(() => {
     if (data) {
@@ -55,6 +58,8 @@ export default function Compose() {
       setUnreadCount(dataArray.filter((mail) => !mail.read).length);
     }
   }, [data]);
+
+
 
   const getInboxMails = () => {
     setDefaultScreen(true);
@@ -113,11 +118,41 @@ export default function Compose() {
     }
   };
 
+  // const viewHandle = (id, to, subject, body)=>{
+  //   console.log(id, to, subject, body);
+  //   <FullScreen/>
+  // }
+
+  const viewHandle = (mail) => {
+    setSelectedMail(mail); // Set the selected mail to be displayed
+  };
+
+  const closeFullScreen = () => {
+    setSelectedMail(null); // Clear the selected mail to close the FullScreen component
+  };
+
+  const handleComposeOpen = () => {
+    setIsComposeOpen(true);
+    // console.log("im click");
+    // console.log(isComposeOpen);
+  };
+
+  const handleComposeClose = () => {
+    setIsComposeOpen(false);
+  };
+
+  const handleMailSent = (newMail) => {
+    setMails((prevMails) => [newMail, ...prevMails]);
+    setUnreadCount((prevCount) => prevCount + 1);
+  };
+
+
   return (
     <>
       <div>
         <div className="box float-left bg-gray-400 w-1/5 min-h-screen p-4">
-          <button className="w-4/5 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-lg text-center p-2.5 mb-4">
+          <button className="w-4/5 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-lg text-center p-2.5 mb-4"
+          onClick={handleComposeOpen}>
             Compose
           </button>
 
@@ -237,14 +272,22 @@ export default function Compose() {
                       <p className="text-gray-700">Body: {mail.body}</p>
                       {!mail.read && (
                         <button
-                          className="bg-blue-500 px-2 border border-1 mt-2 rounded-md"
+                          className="bg-blue-500 px-2 border border-1 mt-2 rounded-md mx-2"
                           onClick={() => markAsRead(mail.id)}
                         >
                           Read
                         </button>
                       )}
+                       <button
+                        className="bg-green-300 px-2 border border-1 mt-2 rounded-md mx-2"
+                        // onClick={() => viewHandle(mail.id, mail.to, mail.subject, mail.body)}
+                        onClick={() => viewHandle(mail)}
+                      >
+                        View
+                      </button>
+
                       <button
-                        className="bg-red-500 px-2 border border-1 mt-2 rounded-md"
+                        className="bg-red-500 px-2 border border-1 mt-2 rounded-md mx-2"
                         onClick={() => deleteHandle(mail.id)}
                       >
                         Delete
@@ -273,6 +316,16 @@ export default function Compose() {
           </div>
         </div>
       </div>
+      {selectedMail && (
+        <FullScreen mail={selectedMail} onClose={closeFullScreen} />
+      )}
+      {/* {mailOpen &&(
+        <Mail onClose={handleComposeClose}/>
+      )} */}
+
+{/* {isComposeOpen && (<Mail onClose={handleComposeClose} />)} */}
+{isComposeOpen && (<Mail onClose={handleComposeClose} onMailSent={handleMailSent} />)}
+
     </>
   );
 }
