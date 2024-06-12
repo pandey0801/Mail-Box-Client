@@ -28,6 +28,7 @@ export default function Mail({onClose,  onMailSent}) {
     setMailDetails({
       ...mailDetails,
       [name]: value,
+      read: false,
     });
   };
 

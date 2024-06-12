@@ -71,7 +71,15 @@ export default function Compose() {
     setIsSentBox(true);
   };
 
-  const deleteHandle = (id) => {
+  const deleteHandle = (id, ) => {
+    const foundMail = mails.filter((mail) => mail.id === id);
+    const [read] = foundMail.map((obj) => obj.read);
+    console.log(foundMail);
+    console.log(read);
+    if(!read){
+      setUnreadCount((prevCount) => prevCount - 1);
+    }
+    
     fetch(
       `https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail/${id}.json`,
       {
@@ -79,8 +87,12 @@ export default function Compose() {
       }
     )
       .then((res) => {
+        const resdata  = res.json();
         if (res.ok) {
           setMails((prevMails) => prevMails.filter((mail) => mail.id !== id));
+          console.log(resdata);
+          console.log(resdata.read);
+
         } else {
           throw new Error("Failed to delete data.");
         }
@@ -89,9 +101,16 @@ export default function Compose() {
   };
 
   const markAsRead = (id) => {
+    console.log(id);
     const mailToUpdate = mails.find((mail) => mail.id === id);
     if (mailToUpdate) {
       const updatedMail = { ...mailToUpdate, read: true };
+
+      // const mailToUpdate = mails.find((mail) => mail.id === id);
+    // if (mailToUpdate) {
+      // const updatedMail = { ...mailToUpdate, read: true };
+
+
       fetch(
         `https://expensetracker-7f8dd-default-rtdb.firebaseio.com/mail/${id}.json`,
         {
@@ -273,6 +292,7 @@ export default function Compose() {
                       {!mail.read && (
                         <button
                           className="bg-blue-500 px-2 border border-1 mt-2 rounded-md mx-2"
+                          // onClick={() => markAsRead(mail.id)}
                           onClick={() => markAsRead(mail.id)}
                         >
                           Read
