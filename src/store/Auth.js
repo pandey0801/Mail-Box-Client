@@ -14,6 +14,7 @@ const logSlice = createSlice({
       state.token = action.payload.token;
     },
     logout: (state) => {
+      console.log("check it ");
       state.islogin = false;
       state.token = null;
     }

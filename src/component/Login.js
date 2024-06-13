@@ -3,6 +3,7 @@ import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../store/Auth";
 import Mail from "./Mail";
+import Compose from "./Compose";
 
 export default function Login() {
   const email = useRef("");
@@ -78,7 +79,7 @@ export default function Login() {
 
   return (
     <>
-      {/* {!auth.islogin ? ( */}
+      {!auth.islogin ? (
         <div
           className={`flex flex-col justify-center items-center min-h-screen ${
             theme ? "bg-gray-900" : "bg-gray-100"
@@ -176,9 +177,9 @@ export default function Login() {
             </span>
           </button>
         </div>
-      {/* // ) : (
-        // <Mail />
-      // )} */}
+       ) : (
+        <Compose/>
+     )} 
     </>
   );
 }
